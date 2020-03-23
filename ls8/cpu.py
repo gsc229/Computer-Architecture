@@ -7,7 +7,10 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.registers = [0] * 8
+        self.pc = 0
+
 
     def load(self):
         """Load a program into memory."""
@@ -30,6 +33,7 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
+        print(self.ram)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -39,13 +43,18 @@ class CPU:
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
+    
+    def ram_read(self, pc):
+        self.ram[pc]
 
+    def ram_write(self, pc, value ):
+        self.ram[pc] = value
+        
     def trace(self):
         """
         Handy function to print out the CPU state. You might want to call this
         from run() if you need help debugging.
         """
-
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
             #self.fl,
@@ -62,4 +71,4 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        self.trace()
