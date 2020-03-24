@@ -8,13 +8,12 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 256
-        self.registers = [0] * 8
+        self.register = [0] * 8
         self.pc = 0
 
 
     def load(self):
         """Load a program into memory."""
-
         address = 0
 
         # For now, we've just hardcoded a program:
@@ -44,11 +43,11 @@ class CPU:
         else:
             raise Exception("Unsupported ALU operation")
     
-    def ram_read(self, pc):
+    def ram_read(self, mar):
         self.ram[pc]
 
-    def ram_write(self, pc, value ):
-        self.ram[pc] = value
+    def ram_write(self, mar, mdr ):
+        self.ram[mar] = mdr
         
     def trace(self):
         """
@@ -71,4 +70,25 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        self.trace()
+        while True:
+            
+            IR = self.ram[self.pc]
+            
+            if IR == 130:
+                
+                self.pc += 2
+                self.register[self.pc] = IR
+                print(self.register[self.pc])
+                
+        
+            elif IR == 71:  
+                        
+                print(self.register[0])
+                self.pc += 1
+
+            elif IR == 1:
+                print("BREAK")
+                break
+
+            self.pc += 1
+            
