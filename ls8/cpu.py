@@ -12,34 +12,39 @@ class CPU:
         self.pc = 0
 
 
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
         address = 0
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
         for instruction in program:
+            print(f"instruction from program: {instruction}")
             self.ram[address] = instruction
             address += 1
 
-        print(self.ram)
+
+        #Sprint(self.ram)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
+            self.register[reg_a] += self.register[reg_b]
         #elif op == "SUB": etc
+        elif op == "MUL":
+            print(f"MUL: {self.register[reg_a] * self.register[reg_b]}")
+            return self.register[reg_a] * self.register[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
     
@@ -73,22 +78,31 @@ class CPU:
         while True:
             
             IR = self.ram[self.pc]
-            
+            #print(f"register: {self.register}")
             if IR == 130:
-                
                 self.pc += 2
-                self.register[self.pc] = IR
+                self.register[self.pc] = self.ram[self.pc]
                 print(self.register[self.pc])
                 
-        
             elif IR == 71:  
-                        
                 print(self.register[0])
                 self.pc += 1
+
+            elif IR == 162:
+                print(f"pc: {self.pc}, register:{self.register}")
+                print(f"register[self.pc-4]: {self.register[self.pc - 4]}, register[self.pc - 1]: {self.register[self.pc -1]} ")
+                reg_a = self.pc - 4
+                reg_b = self.pc -1
+                print(f"reg_a: {reg_a}")
+                print(f"reg_b: {reg_b}")
+                self.alu("MUL", reg_a, reg_b)
 
             elif IR == 1:
                 print("BREAK")
                 break
 
             self.pc += 1
+        print(f"self.pc: {self.pc}")
+        print(f"self.register: {self.register}")
+        print(f"self.ram: {self.ram}")
             
