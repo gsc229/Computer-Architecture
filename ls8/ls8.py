@@ -26,11 +26,7 @@ with open(filename) as f:
             print(num)
             program.append(num)
             
-            
-
-
 print(f"program to run: {program}")
-
 
 cpu = CPU()
 

@@ -1,5 +1,6 @@
 """CPU functionality."""
-
+from colorama import init, Fore
+init(autoreset=True)
 import sys
 
 class CPU:
@@ -9,7 +10,8 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.register = [0] * 8
-        self.pc = 0
+        self.pc = 0 # program counter
+        self.stack_pointer = 244 # stack for temporary info
 
 
     def load(self, program):
@@ -43,13 +45,13 @@ class CPU:
             self.register[reg_a] += self.register[reg_b]
         #elif op == "SUB": etc
         elif op == "MUL":
-            print(f"MUL: {self.register[reg_a] * self.register[reg_b]}")
+            print(f"MULTIPLY RESULT: {self.register[reg_a] * self.register[reg_b]} !")
             return self.register[reg_a] * self.register[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
     
     def ram_read(self, mar):
-        self.ram[pc]
+        self.ram[mar]
 
     def ram_write(self, mar, mdr ):
         self.ram[mar] = mdr
@@ -69,37 +71,69 @@ class CPU:
         ), end='')
 
         for i in range(8):
-            print(" %02X" % self.reg[i], end='')
+            print(" %02X" % self.register[i], end='')
 
         print()
 
     def run(self):
         """Run the CPU."""
         while True:
-            
-            IR = self.ram[self.pc]
-            #print(f"register: {self.register}")
-            if IR == 130:
-                self.pc += 2
-                self.register[self.pc] = self.ram[self.pc]
-                print(self.register[self.pc])
-                
-            elif IR == 71:  
-                print(self.register[0])
-                self.pc += 1
-
-            elif IR == 162:
-                print(f"pc: {self.pc}, register:{self.register}")
-                print(f"register[self.pc-4]: {self.register[self.pc - 4]}, register[self.pc - 1]: {self.register[self.pc -1]} ")
-                reg_a = self.pc - 4
-                reg_b = self.pc -1
-                print(f"reg_a: {reg_a}")
-                print(f"reg_b: {reg_b}")
-                self.alu("MUL", reg_a, reg_b)
-
-            elif IR == 1:
-                print("BREAK")
+            if self.pc > 30:
                 break
+            print(Fore.GREEN + f"--------\nREADING: {self.ram[self.pc]} AT RAM[PC == {self.pc}], STACK_POINTER: {self.stack_pointer}")
+            IR = self.ram[self.pc]
+            a = self.ram[self.pc + 1]
+            b = self.ram[self.pc + 2]
+            #print(f"register: {self.register}")
+            
+            # LDI 
+            if IR == 130: 
+                print(f"--------\nLDI R{a} = {b}")           
+                self.register[a] = b
+                self.pc += 2
+            # PRINT
+            elif IR == 71:  
+                print(Fore.YELLOW + f"--------\nPRINTING: R{a} == {self.register[a]} pc: {self.pc} ")
+                self.pc += 1
+            # MULTIPLY
+            elif IR == 162:
+                print(Fore.LIGHTCYAN_EX + f"--------\nMULTIPLYING pc: {self.pc}, register:{self.register}")
+                print(f"register[self.pc-4]: {self.register[self.pc - 4]}, register[self.pc - 1]: {self.register[self.pc -1]} ")
+                
+                print(f"reg a: {a}")
+                print(f"reg b: {b}")
+                self.alu("MUL", a, b)
+            # PUSH
+            elif IR == 69:
+                
+                self.stack_pointer -= 1
+                self.ram[self.stack_pointer] = self.register[a]
+                print(f"--------\nPUSH R{a} to RAM[{self.stack_pointer}]")
+                print(f"RAM[{self.stack_pointer}] == {self.ram[self.stack_pointer]}")
+                self.pc += 1
+            # POP
+            elif IR == 70:                
+                self.register[a] = self.ram[self.stack_pointer] 
+                print(f"--------\nPOP RAM[{self.stack_pointer}] to R{a}")
+                print(f"R{a} == {self.register[a]}")
+                self.stack_pointer += 1
+                self.pc += 1
+            # INTHANDLER
+            elif IR == 132:
+                self.pc += 2
+                print(f"INTHANDLER")
+
+            # CALL
+            elif IR == 80:     
+                print(f"CALL")
+                #self.pc = self.register[0]
+                
+            # HALT
+            elif IR == 1:
+                print(Fore.LIGHTRED_EX+ "HALT")
+                break
+
+                
 
             self.pc += 1
         print(f"self.pc: {self.pc}")
