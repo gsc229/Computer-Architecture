@@ -45,7 +45,7 @@ class CPU:
             self.register[reg_a] += self.register[reg_b]
         #elif op == "SUB": etc
         elif op == "MUL":
-            print(f"MULTIPLY RESULT: {self.register[reg_a] * self.register[reg_b]} !")
+            print(Fore.MAGENTA + f"MULTIPLY RESULT: {self.register[reg_a] * self.register[reg_b]} !")
             return self.register[reg_a] * self.register[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
@@ -78,23 +78,28 @@ class CPU:
     def run(self):
         """Run the CPU."""
         while True:
-            if self.pc > 30:
+            if self.pc > 32: 
                 break
+
+
             print(Fore.GREEN + f"--------\nREADING: {self.ram[self.pc]} AT RAM[PC == {self.pc}], STACK_POINTER: {self.stack_pointer}")
             IR = self.ram[self.pc]
+
             a = self.ram[self.pc + 1]
             b = self.ram[self.pc + 2]
             #print(f"register: {self.register}")
             
             # LDI 
             if IR == 130: 
-                print(f"--------\nLDI R{a} = {b}")           
+                print(f"--------\nLDI R{a} = {b} pc = {self.pc}")           
                 self.register[a] = b
-                self.pc += 2
+                self.pc += 3
+
             # PRINT
             elif IR == 71:  
                 print(Fore.YELLOW + f"--------\nPRINTING: R{a} == {self.register[a]} pc: {self.pc} ")
-                self.pc += 1
+                self.pc += 2
+
             # MULTIPLY
             elif IR == 162:
                 print(Fore.LIGHTCYAN_EX + f"--------\nMULTIPLYING pc: {self.pc}, register:{self.register}")
@@ -103,6 +108,8 @@ class CPU:
                 print(f"reg a: {a}")
                 print(f"reg b: {b}")
                 self.alu("MUL", a, b)
+                self.pc += 3
+
             # PUSH
             elif IR == 69:
                 
@@ -110,32 +117,47 @@ class CPU:
                 self.ram[self.stack_pointer] = self.register[a]
                 print(f"--------\nPUSH R{a} to RAM[{self.stack_pointer}]")
                 print(f"RAM[{self.stack_pointer}] == {self.ram[self.stack_pointer]}")
-                self.pc += 1
+                self.pc += 2
+
             # POP
             elif IR == 70:                
                 self.register[a] = self.ram[self.stack_pointer] 
                 print(f"--------\nPOP RAM[{self.stack_pointer}] to R{a}")
                 print(f"R{a} == {self.register[a]}")
                 self.stack_pointer += 1
-                self.pc += 1
-            # INTHANDLER
-            elif IR == 132:
                 self.pc += 2
-                print(f"INTHANDLER")
+
 
             # CALL
-            elif IR == 80:     
-                print(f"CALL")
-                #self.pc = self.register[0]
+            elif IR == 80:
+                print(Fore.LIGHTCYAN_EX + f"--------\nCALL R1 {self.register[1]}")
+                self.stack_pointer -= 1
+                self.ram[self.stack_pointer] = self.pc + 1
+                print(f"--------\nPUSH pc, {self.pc + 1} to RAM[{self.stack_pointer}]")
+                self.pc = self.register[1]
+                print(f"RAM[{self.stack_pointer}] == {self.ram[self.stack_pointer]}, PC now {self.pc}")
                 
+            
+            # MULT2PRINT
+            elif IR == 160:
+                
+                print(f"--------\nMULT2PRINT")
+                print(f"R0 = {self.register[0]} + {self.ram[self.pc + 2]} = {self.register[0] + self.ram[self.pc + 2]}")
+                self.register[0] = self.register[0] * 2
+                self.pc += 3
+
+            # RET
+            elif IR == 17:
+                print(f"--------\nRET")
+                self.pc = self.ram[self.stack_pointer] + 1
+                
+
             # HALT
             elif IR == 1:
                 print(Fore.LIGHTRED_EX+ "HALT")
                 break
-
-                
-
-            self.pc += 1
+            
+            #break
         print(f"self.pc: {self.pc}")
         print(f"self.register: {self.register}")
         print(f"self.ram: {self.ram}")
