@@ -77,3 +77,9 @@
 00000011
 # TEST5 (address 73):
 00000001 # HLT
+
+
+# Expected output:
+# 1
+# 4
+# 5

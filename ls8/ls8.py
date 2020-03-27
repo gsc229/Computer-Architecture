@@ -12,21 +12,21 @@ if len(sys.argv) != 2:
 
 filename = sys.argv[1]
 program = []
-print(help(filename))
+
 with open(filename) as f:
     for line in f:
         # ignore comments
         comment_split = line.split("#")
-        print(comment_split)
+        #print(comment_split)
         # strip out whitespace
         num = comment_split[0].strip()
         if num:
             num = int(num, 2)
             
-            print(num)
+            #print(num)
             program.append(num)
             
-print(f"program to run: {program}")
+print(f"\nprogram to run: {program}\n")
 
 cpu = CPU()
 

@@ -10,9 +10,10 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.register = [0] * 8
+        self.flags = 0
         self.pc = 0 # program counter
         self.stack_pointer = 244 # stack for temporary info
-
+        
 
     def load(self, program):
         """Load a program into memory."""
@@ -31,7 +32,7 @@ class CPU:
         # ]
 
         for instruction in program:
-            print(f"instruction from program: {instruction}")
+            #print(f"instruction from program: {instruction}")
             self.ram[address] = instruction
             address += 1
 
@@ -75,10 +76,16 @@ class CPU:
 
         print()
 
+
+
+    # =============================== CPU ==========================================
+    # =============================== CPU ==========================================
+    # =============================== CPU ==========================================
+    # =============================== CPU ==========================================
     def run(self):
         """Run the CPU."""
         while True:
-            if self.pc > 32: 
+            if self.pc > 82: 
                 break
 
 
@@ -144,7 +151,7 @@ class CPU:
                 print(f"--------\nMULT2PRINT")
                 print(f"R0 = {self.register[0]} + {self.ram[self.pc + 2]} = {self.register[0] + self.ram[self.pc + 2]}")
                 self.register[0] = self.register[0] * 2
-                self.pc += 3
+                self.pc += 3                
 
             # RET
             elif IR == 17:
@@ -156,9 +163,51 @@ class CPU:
             elif IR == 1:
                 print(Fore.LIGHTRED_EX+ "HALT")
                 break
+
+            # CMP - COMPARE
+            elif IR == 167:
+               
+                print(f"--------\nCMP")
+                if self.register[a] < self.register[b]:
+                    print(f"R{a}({self.register[a]}) < R{b}({self.register[b]})")
+                    self.flags = 0b00000100 # dec 4
+                elif self.register[a] > self.register[b]:
+                    self.flags = 0b00000010 # dec 2
+                elif self.register[a] ==  self.register[b]:
+                    self.flags = 0b00000001 # dec 1
+                print(f"FLAG: {self.flags}")
+                self.pc += 3
+
+            # JEQ
+            elif IR == 85:
+                print(f"--------\nJEQ")
+                if self.flags == 1:
+                    print(f"FLAG code {self.flags} equal!")
+                    self.pc = self.register[self.ram[self.pc + 1]]
+                
+                else:
+                    print(f"FLAG code {self.flags} not equal!")
+                    self.pc += 2
+                
+            # JNE
+            elif IR == 86:
+                print(f"--------\nJNE")
+                if self.flags != 1:
+                    print(f"FLAG code: {self.flags}, not equal TRUE, Jumping to: RAM[pc == {self.register[self.ram[self.pc + 1]]}]")
+                    self.pc = self.register[self.ram[self.pc + 1]]
+                    
+                else:
+                    self.pc += 2
+
+            # JMP
+            elif IR == 84:
+                print(f"--------\nJNE")
+                print(f"Jumping to RAM[pc == {self.register[self.ram[self.pc+1]]}]")
+                self.pc = self.register[self.ram[self.pc + 1]]
             
-            #break
-        print(f"self.pc: {self.pc}")
+
+            
+        print(f"\nself.pc: {self.pc}")
         print(f"self.register: {self.register}")
         print(f"self.ram: {self.ram}")
             
